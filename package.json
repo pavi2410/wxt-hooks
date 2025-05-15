@@ -1,0 +1,29 @@
+{
+  "name": "wxt-hooks",
+  "version": "1.0.0",
+  "type": "module",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "dist/**/*.js.map"
+  ],
+  "scripts": {
+    "check": "tsc --noEmit",
+    "prebuild": "rm -rf dist",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.1.4"
+  },
+  "peerDependencies": {
+    "react": "^19.1.0",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@wxt-dev/browser": "^0.0.322",
+    "@wxt-dev/storage": "^1.1.1"
+  }
+}
