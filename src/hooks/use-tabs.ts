@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 type Unwrap<T> = T extends Browser.events.Event<infer Inner> ? Inner : never;
 
 // Adaptation from https://github.com/antoinekm/use-chrome/blob/master/src/hooks/tabs/index.ts
-export function useTabs() {
+export function useTabs(): {
+  tabs: Browser.tabs.Tab[];
+  activeTab: Browser.tabs.Tab | undefined;
+} {
   const [tabs, setTabs] = useState<Browser.tabs.Tab[]>([]);
   const [activeTab, setActiveTab] = useState<Browser.tabs.Tab | undefined>(undefined);
 
