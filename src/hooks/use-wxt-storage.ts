@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 export function useWxtStorage<T>(
   // biome-ignore lint/complexity/noBannedTypes: <explanation>
   storageItem: WxtStorageItem<T, {}>,
-): [T, (value: T) => void] {
+): [T, (value: T | ((prev: T) => T)) => void] {
   const [value, setValue] = useState<T>(storageItem.fallback);
 
   // get initial value
@@ -37,13 +37,13 @@ export function useWxtStorage<T>(
 
   // Create a stable setter function
   const updateValue = useCallback(
-    (newValue: T) => {
-      setValue(newValue);
-      storageItem.setValue(newValue).catch((error) => {
+    (newValue: T | ((prev: T) => T)) => {
+      const resolvedValue = typeof newValue === 'function' ? (newValue as (prev: T) => T)(value) : newValue;
+      storageItem.setValue(resolvedValue).catch((error) => {
         console.error("Failed to update storage value:", error);
       });
     },
-    [storageItem],
+    [storageItem, value],
   );
 
   return [value, updateValue];
