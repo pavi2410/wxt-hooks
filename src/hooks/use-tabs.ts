@@ -23,14 +23,14 @@ export function useTabs(): {
   useEffect(() => {
     let isMounted = true;
 
-    const activateListener: Unwrap<Browser.tabs.TabActivatedEvent> = (activeInfo) => {
+    const activateListener: Unwrap<typeof Browser.tabs.onActivated> = (activeInfo) => {
       // console.debug("Tab activated");
       if (isMounted) {
         sync();
       }
     };
 
-    const updateListener: Unwrap<Browser.tabs.TabUpdatedEvent> = (tabId, changeInfo, tab) => {
+    const updateListener: Unwrap<typeof Browser.tabs.onUpdated> = (tabId, changeInfo, tab) => {
       if (changeInfo.status === "complete") {
         // console.debug("Tab updated");
         if (isMounted) {
@@ -39,14 +39,14 @@ export function useTabs(): {
       }
     };
 
-    const createListener: Unwrap<Browser.tabs.TabCreatedEvent> = (tab) => {
+    const createListener: Unwrap<typeof Browser.tabs.onCreated> = (tab) => {
       // console.debug("Tab created");
       if (isMounted) {
         sync();
       }
     };
 
-    const removeListener: Unwrap<Browser.tabs.TabRemovedEvent> = (tabId) => {
+    const removeListener: Unwrap<typeof Browser.tabs.onRemoved> = (tabId) => {
       // console.debug("Tab removed");
       if (isMounted) {
         sync();
