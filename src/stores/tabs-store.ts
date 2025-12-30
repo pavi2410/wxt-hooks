@@ -1,20 +1,21 @@
 import { browser, type Browser } from "@wxt-dev/browser";
-import { atom } from "nanostores";
+import { atom, onMount } from "nanostores";
 
 type Unwrap<T> = T extends Browser.events.Event<infer Inner> ? Inner : never;
 
 /**
- * Global store for all tabs in the current window
+ * Global store for all tabs in the current window.
+ *
+ * Automatically initializes browser tab listeners when first subscriber connects.
  */
 export const tabsStore = atom<Browser.tabs.Tab[]>([]);
 
 /**
- * Global store for the active tab in the current window
+ * Global store for the active tab in the current window.
+ *
+ * Automatically initializes browser tab listeners when first subscriber connects.
  */
 export const activeTabStore = atom<Browser.tabs.Tab | undefined>(undefined);
-
-// Flag to ensure listeners are only set up once
-let listenersInitialized = false;
 
 /**
  * Syncs the current tabs state from the browser to the stores
@@ -26,17 +27,8 @@ const sync = async () => {
   tabsStore.set(tabs);
 };
 
-/**
- * Initializes browser tab event listeners and performs initial sync.
- * This function is idempotent - it will only set up listeners once.
- *
- * Call this function to start tracking tabs state in the stores.
- * For React projects, this is automatically called by the useTabs hook.
- */
-export const initializeTabsStore = () => {
-  if (listenersInitialized) return;
-  listenersInitialized = true;
-
+// Use onMount to lazily initialize listeners when first subscriber connects
+onMount(tabsStore, () => {
   const activateListener: Unwrap<typeof Browser.tabs.onActivated> = () => {
     sync();
   };
@@ -62,4 +54,12 @@ export const initializeTabsStore = () => {
 
   // Initial sync
   sync();
-};
+
+  // Return cleanup function to remove listeners when last subscriber disconnects
+  return () => {
+    browser.tabs.onActivated.removeListener(activateListener);
+    browser.tabs.onUpdated.removeListener(updateListener);
+    browser.tabs.onCreated.removeListener(createListener);
+    browser.tabs.onRemoved.removeListener(removeListener);
+  };
+});
