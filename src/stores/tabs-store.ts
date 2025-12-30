@@ -3,28 +3,26 @@ import { atom, onMount } from "nanostores";
 
 type Unwrap<T> = T extends Browser.events.Event<infer Inner> ? Inner : never;
 
-/**
- * Global store for all tabs in the current window.
- *
- * Automatically initializes browser tab listeners when first subscriber connects.
- */
-export const tabsStore = atom<Browser.tabs.Tab[]>([]);
+export interface TabsState {
+  tabs: Browser.tabs.Tab[];
+  activeTab: Browser.tabs.Tab | undefined;
+}
 
 /**
- * Global store for the active tab in the current window.
+ * Global store for browser tabs state in the current window.
  *
+ * Contains both the list of all tabs and the currently active tab.
  * Automatically initializes browser tab listeners when first subscriber connects.
  */
-export const activeTabStore = atom<Browser.tabs.Tab | undefined>(undefined);
+export const tabsStore = atom<TabsState>({ tabs: [], activeTab: undefined });
 
 /**
- * Syncs the current tabs state from the browser to the stores
+ * Syncs the current tabs state from the browser to the store
  */
 const sync = async () => {
   const tabs = await browser.tabs.query({ currentWindow: true });
   const activeTab = tabs.find((tab) => tab.active);
-  activeTabStore.set(activeTab);
-  tabsStore.set(tabs);
+  tabsStore.set({ tabs, activeTab });
 };
 
 // Use onMount to lazily initialize listeners when first subscriber connects

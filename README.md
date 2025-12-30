@@ -94,36 +94,31 @@ function Counter() {
 
 This package exposes nanostores atoms that can be used directly in vanilla JavaScript, TypeScript, or other frameworks (Vue, Svelte, Solid, etc.).
 
-### `tabsStore` & `activeTabStore`
+### `tabsStore`
 
-Global stores for browser tabs state. These stores use lazy initialization - browser event listeners are automatically set up when you subscribe and cleaned up when you unsubscribe.
+Global store for browser tabs state containing both the list of tabs and the active tab. This store uses lazy initialization - browser event listeners are automatically set up when you subscribe and cleaned up when you unsubscribe.
 
 ```typescript
-import { tabsStore, activeTabStore } from 'wxt-hooks';
+import { tabsStore } from 'wxt-hooks';
 
-// Subscribe to all tabs
-const unsubscribeTabs = tabsStore.subscribe(tabs => {
+// Subscribe to tabs state
+const unsubscribe = tabsStore.subscribe(({ tabs, activeTab }) => {
   console.log('All tabs:', tabs);
-});
-
-// Subscribe to active tab
-const unsubscribeActive = activeTabStore.subscribe(activeTab => {
   console.log('Active tab:', activeTab);
 });
 
 // Cleanup when done
-unsubscribeTabs();
-unsubscribeActive();
+unsubscribe();
 ```
 
 **Direct store access:**
 
 ```typescript
-import { tabsStore, activeTabStore } from 'wxt-hooks';
+import { tabsStore } from 'wxt-hooks';
 
 // Get current value (without subscribing)
-const currentTabs = tabsStore.get();
-const currentActiveTab = activeTabStore.get();
+const { tabs, activeTab } = tabsStore.get();
+console.log(`${tabs.length} tabs, active: ${activeTab?.title}`);
 ```
 
 **Integration with other frameworks:**
@@ -132,21 +127,25 @@ const currentActiveTab = activeTabStore.get();
 <!-- Vue 3 -->
 <script setup>
 import { useStore } from '@nanostores/vue';
-import { tabsStore, activeTabStore } from 'wxt-hooks';
+import { tabsStore } from 'wxt-hooks';
 
-const tabs = useStore(tabsStore);
-const activeTab = useStore(activeTabStore);
+const tabsState = useStore(tabsStore);
 </script>
+
+<template>
+  <h2>Active: {{ tabsState.activeTab?.title }}</h2>
+  <li v-for="tab in tabsState.tabs" :key="tab.id">{{ tab.title }}</li>
+</template>
 ```
 
 ```svelte
 <!-- Svelte -->
 <script>
-  import { tabsStore, activeTabStore } from 'wxt-hooks';
+  import { tabsStore } from 'wxt-hooks';
 </script>
 
-<h2>Active: {$activeTabStore?.title}</h2>
-{#each $tabsStore as tab}
+<h2>Active: {$tabsStore.activeTab?.title}</h2>
+{#each $tabsStore.tabs as tab}
   <li>{tab.title}</li>
 {/each}
 ```
